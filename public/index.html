@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ToDoMvc</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+
+
+        $(document).ready(function () {
+
+
+            $("body").on("click", ".remove", function () {
+                $.ajax({
+                    type: "DELETE",
+                    url: "/todos/" + $(this).data('id'),
+                    complete: function () {
+                        update();
+                    }
+                });
+
+            });
+
+        });
+        $(document).ready(function () {
+            $("body").on("click", ".check", function () {
+                var text = this.parentElement.textContent.replace("Remove", "");
+                var id =$(this).data('id');
+                var completed = this.checked;
+                var todo = {
+                    id: id,
+                    task:text,
+                    completed: completed,
+                };
+                var json = JSON.stringify(todo);
+                $.ajax({
+                    type:"PATCH",
+                    url:"/todos",
+                    data:json,
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    complete: function () {
+                        update();
+                    }
+                })
+            });
+        });
+
+        function update() {
+            $(".todos").empty();
+            $(document).ready(function () {
+                $.get("/todos", function (data, status) {
+                    var response = data.map(function (item) {
+                        var li = document.createElement("li");
+                        li.innerText = item.task;
+                        if (item.completed == true) {
+                            li.classList.add('done');
+                            $('<button data-id="' + item.id + '" class="remove">Remove</button>').prependTo(li);
+                            $('<input type="checkbox" checked data-id="' + item.id + '" class="check" />').prependTo(li);
+                        }
+                        else {
+                            li.classList.remove('done');
+                            $('<button data-id="' + item.id + '" class="remove">Remove</button>').prependTo(li);
+                            $('<input type="checkbox" data-id="' + item.id + '" class="check" />').prependTo(li);
+                        }
+                        return li;
+                    });
+
+                    function writeToUl(selector, data) {
+                        var ul = document.querySelector(selector);
+                        response.forEach(function (item) {
+                            ul.appendChild(item);
+                        })
+                    };
+                    writeToUl(".todos", response);
+                });
+            });
+        }
+        ;
+    </script>
+
+</head>
+<body onload="update()">
+<ul class="todos">
+
+</ul>
+<div class="newtodo">
+
+    <script>
+        function addToDo() {
+            var todo = {task: $("#todotext").val()};
+            var json = JSON.stringify(todo);
+            $.ajax({
+                type: "POST",
+                url: "/todos",
+                data: json,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                complete: function () {
+                    update();
+                    $('#todotext').val('');
+                }
+            });
+        };
+    </script>
+    What need to do?
+    <input type="text" id="todotext" class="todotext">
+    <button class="new" onclick="addToDo()" >Add to todo-list.</button>
+</div>
+</body>
+</html>
