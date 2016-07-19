@@ -89,19 +89,25 @@
 
     <script>
         function addToDo() {
-            var todo = {task: $("#todotext").val()};
-            var json = JSON.stringify(todo);
-            $.ajax({
-                type: "POST",
-                url: "/todos",
-                data: json,
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                complete: function () {
-                    update();
-                    $('#todotext').val('');
-                }
-            });
+            if ($("#todotext").val() != '') {
+                var todo = {task: $("#todotext").val()};
+                var json = JSON.stringify(todo);
+                $.ajax({
+                    type: "POST",
+                    url: "/todos",
+                    data: json,
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    complete: function () {
+                        update();
+                        $('#todotext').val('');
+                    }
+                });
+            }
+            else {
+                alert("Empty todos not allowed");
+                update();
+            }
         };
     </script>
     What need to do?
